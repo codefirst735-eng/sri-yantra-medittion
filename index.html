@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Immersive 10-minute Sri Yantra meditation tool. Features a slow-rotating sacred geometry SVG, left-to-right eye-movement synchronization, and Web Audio API 6Hz Theta wave binaural beats for deep brain hemisphere synchronization.">
+  <title>Sri Yantra Meditation - Brain Hemisphere Synchronization</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Starfield Particle Canvas -->
+  <canvas id="starfield"></canvas>
+  
+  <!-- Glowing Background Nebula -->
+  <div class="nebula"></div>
+
+  <div class="app-container">
+    
+    <!-- Collapsible Settings Panel Toggle Button -->
+    <button class="toggle-settings-btn" id="toggle-settings-btn">✕</button>
+
+    <!-- Visualizer Canvas Area -->
+    <main class="canvas-container">
+      
+      <!-- Breathing Guide Ring -->
+      <div class="breathing-ring">
+        <span class="breathing-label">Breathe In</span>
+      </div>
+
+      <!-- Centered Sri Yantra Wrapper -->
+      <div class="yantra-wrapper">
+        <svg id="sri" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+          <!-- Sri Yantra geometry drawn here programmatically -->
+        </svg>
+      </div>
+
+      <!-- Meditative Head-Up-Display (HUD) -->
+      <div class="hud-display" id="hud-display">
+        <div class="timer-circular">
+          <svg>
+            <circle class="circle-bg" cx="30" cy="30" r="26"></circle>
+            <circle class="circle-progress" cx="30" cy="30" r="26"></circle>
+          </svg>
+          <div class="timer-text-overlay">10:00</div>
+        </div>
+        <div class="hud-info">
+          <span class="hud-timer">10:00</span>
+          <span class="hud-mode" id="hud-mode">Geometric Zig-Zag Flow</span>
+        </div>
+      </div>
+      
+      <!-- Gayatri Mantra Floating Lyric Overlay -->
+      <div class="mantra-overlay" id="mantra-overlay">
+        <div class="mantra-sanskrit" id="mantra-sanskrit">ॐ भूर्भुवः स्वः ।</div>
+        <div class="mantra-translit" id="mantra-translit">oṃ bhūr bhuvaḥ svaḥ</div>
+        <div class="mantra-translation" id="mantra-translation">We contemplate the cosmic fields of physical, vital, and causal existence.</div>
+      </div>
+      
+    </main>
+
+    <!-- Sleek Glassmorphic Control Panel -->
+    <aside class="settings-panel" id="settings-panel">
+      <div>
+        <h1>SRI YANTRA</h1>
+        <div class="subtitle">SACRED HEMISPHERE HARMONIZER</div>
+
+        <!-- Section 1: Duration Slider -->
+        <section class="settings-section">
+          <div class="section-title">Meditation Timing</div>
+          <div class="control-group">
+            <div class="control-label-wrapper">
+              <span class="control-label">Session Length</span>
+              <span class="control-value" id="duration-val">10 min</span>
+            </div>
+            <input type="range" id="duration-slider" min="1" max="60" value="10">
+          </div>
+        </section>
+
+        <!-- Section 2: Visual Themes -->
+        <section class="settings-section">
+          <div class="section-title">Visual Resonance</div>
+          <div class="control-group">
+            <span class="control-label-wrapper" style="font-size: 0.85rem; margin-bottom: 0.5rem;">Aesthetic Theme</span>
+            <div class="theme-picker">
+              <button class="theme-btn active" data-theme-val="gold" title="Cosmic Gold">
+                <span></span>
+                <font size="1">Gold</font>
+              </button>
+              <button class="theme-btn" data-theme-val="indigo" title="Electric Indigo">
+                <span></span>
+                <font size="1">Indigo</font>
+              </button>
+              <button class="theme-btn" data-theme-val="emerald" title="Healing Emerald">
+                <span></span>
+                <font size="1">Emerald</font>
+              </button>
+              <button class="theme-btn" data-theme-val="crimson" title="Sacred Crimson">
+                <span></span>
+                <font size="1">Ruby</font>
+              </button>
+              <button class="theme-btn" data-theme-val="traditional" title="Traditional Colored: Recreates the exact authentic color scheme (green Bhupura, yellow and red petals, white ground, and colored triangles) of the classical Sri Yantra.">
+                <span></span>
+                <font size="1">Sacred</font>
+              </button>
+            </div>
+          </div>
+          
+          <div class="control-group" style="margin-top: 1rem;">
+            <div class="control-label-wrapper">
+              <span class="control-label">Rotation Speed</span>
+              <span class="control-value" id="rotation-val">Medium</span>
+            </div>
+            <input type="range" id="rotation-slider" min="0" max="100" value="40">
+          </div>
+        </section>
+
+        <!-- Section 3: Hemisphere Synchronization Modes -->
+        <section class="settings-section">
+          <div class="section-title">Hemisphere Sync Modes</div>
+          <div class="mode-picker">
+            <button class="mode-btn active" data-mode="zigzag" title="Geometric Zig-Zag Flow: Traces a fluid, glowing comets-like path index-by-index along the interlocking lines of the 9 triangles. Completely safe and peaceful, with zero flashing.">
+              <span class="icon">⚡</span>
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 500;">Geometric Zig-Zag Flow</span>
+                <span style="font-size: 0.7rem; opacity: 0.6;">Traces paths of interlocking triangles</span>
+              </div>
+            </button>
+            <button class="mode-btn" data-mode="wave" title="Concentric Circle Ripples: Smooth waves of light expand radially from the central Bindu outwards through the entire yantra. Highly calming, natural, and safe.">
+              <span class="icon">☉</span>
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 500;">Concentric Circle Ripples</span>
+                <span style="font-size: 0.7rem; opacity: 0.6;">Calming radial waves expanding outwards</span>
+              </div>
+            </button>
+            <button class="mode-btn" data-mode="breathing" title="All geometric lines pulse dynamically in sync with a classic 4-4-4-4 equal ratio box breathing meditation helper.">
+              <span class="icon">◎</span>
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 500;">Breathing Harmony</span>
+                <span style="font-size: 0.7rem; opacity: 0.6;">Syncs with visual breathing guide</span>
+              </div>
+            </button>
+            <button class="mode-btn" data-mode="still" title="Soft golden glowing lines stay stationary, perfect for traditional Trataka focus (gazing meditation).">
+              <span class="icon">👁</span>
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 500;">Stillness Gazing (Trataka)</span>
+                <span style="font-size: 0.7rem; opacity: 0.6;">Traditional deep gazing focus</span>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        <!-- Section 4: Binaural Audio Synthesis -->
+        <section class="settings-section">
+          <div class="section-title">Auditory Brainwave Pacing</div>
+          <div class="audio-card">
+            <button class="sound-toggle-btn active" id="sound-toggle-btn">
+              <span>🔊</span> Binaural Sound: ON
+            </button>
+            
+            <div class="freq-selector">
+              <button class="freq-btn active" data-freq="6" title="Theta Waves (6Hz): Ideal for deep meditation, hemisphere integration, and lucid daydreaming.">Theta (6Hz)</button>
+              <button class="freq-btn" data-freq="10" title="Alpha Waves (10Hz): Ideal for relaxed focus, stress reduction, and mental clarity.">Alpha (10Hz)</button>
+              <button class="freq-btn" data-freq="4" title="Deep Theta/Delta (4Hz): Ideal for absolute recovery, profound stillness, and rest.">Delta (4Hz)</button>
+              <button class="freq-btn" data-freq="18" title="High Beta (18Hz): Ideal for sharp active focus, sensory calibration, and cognition.">Beta (18Hz)</button>
+              <button class="freq-btn" style="grid-column: span 2; font-weight: 600; border-color: rgba(var(--glow-rgb), 0.35); background: rgba(var(--glow-rgb), 0.05);" data-freq="adhd" title="ADHD Focus Flow: Continuous dynamic frequency sweeping across the entire spectrum (4Hz to 24Hz) to keep the ADHD brain actively engaged and focused.">⚡ ADHD SPECTRUM FLOW</button>
+            </div>
+            
+            <div id="adhd-monitor" style="display: none; font-size: 0.72rem; text-align: center; color: var(--accent-color); margin-top: 0.5rem; letter-spacing: 0.04em; font-weight: 500;">
+              Sweep Beat: <span id="adhd-freq-val">--</span> Hz (Modulating)
+            </div>
+            
+            <div class="control-group" style="margin-top: 1.25rem;">
+              <div class="control-label-wrapper">
+                <span class="control-label" style="font-size: 0.75rem;">Sound Volume</span>
+                <span class="control-value" style="font-size: 0.75rem;" id="volume-val">50%</span>
+              </div>
+              <input type="range" id="volume-slider" min="0" max="100" value="50">
+            </div>
+
+            <button class="sound-test-btn" id="headphone-test-btn">Spatial Sound Calibration</button>
+          </div>
+        </section>
+
+        <!-- Section 5: Vedic Gayatri Mantra -->
+        <section class="settings-section">
+          <div class="section-title">Vedic Gayatri Mantra</div>
+          <div class="audio-card">
+            <button class="sound-toggle-btn" id="mantra-toggle-btn" style="background: rgba(var(--glow-rgb), 0.02); border-color: var(--panel-border);">
+              <span>ॐ</span> Gayatri Chant: OFF
+            </button>
+            
+            <div class="freq-selector" style="grid-template-columns: repeat(2, 1fr); margin-top: 0.75rem;">
+              <button class="freq-btn active" id="mantra-tempo-normal" title="Normal Vedic tempo for rhythmic meditation pacing.">Normal Tempo</button>
+              <button class="freq-btn" id="mantra-tempo-slow" title="Slow, deep, harmonic drone chants designed for deep relaxation and ADHD focus.">Slow & Deep</button>
+            </div>
+            
+            <button class="sound-toggle-btn active" id="lyrics-toggle-btn" style="margin-top: 0.75rem; background: rgba(var(--glow-rgb), 0.05); border-color: rgba(var(--glow-rgb), 0.2);">
+              <span>👁</span> Show Lyric Guide: ON
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Master Action Controls -->
+      <div class="master-btn-container">
+        <button class="start-meditation-btn" id="start-meditation-btn">Start Meditation</button>
+        <div class="footer-text">Requires stereo headphones for best effects</div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Modal Overlay: Boot/First-time Headphone Notification -->
+  <div class="modal-overlay visible" id="headphone-modal">
+    <div class="modal-card">
+      <div class="modal-icon">🎧</div>
+      <h2 class="modal-title">Stereo Headphones Recommended</h2>
+      <p class="modal-body">
+        This tool uses precision **Binaural Beats (Theta Waves)** to guide your brain hemispheres into absolute synchronization. For the physical wave frequencies to interact correctly in your brain, **stereo headphones must be worn**.
+      </p>
+      <button class="modal-btn" onclick="closeHeadphoneModal()">I Have My Headphones On</button>
+    </div>
+  </div>
+
+  <!-- Modal Overlay: Completion Modal -->
+  <div class="modal-overlay" id="completion-modal">
+    <div class="modal-card">
+      <div class="modal-icon" style="animation: none; color: var(--accent-color);">✨</div>
+      <h2 class="modal-title">Meditation Completed</h2>
+      <p class="modal-body">
+        Your brain hemispheres have completed their 10-minute synchronization session. Spend a few moments enjoying this balanced, centered state of mental peace and alignment.
+      </p>
+      <button class="modal-btn" onclick="closeCompletionModal()">Return to Center</button>
+    </div>
+  </div>
+
+  <!-- Load Visual and Auditory Script Modules -->
+  <script src="audio.js"></script>
+  <script src="yantra.js"></script>
+
+  <!-- Glue Bindings Script for Front-end Actions -->
+  <script>
+    // Close headphone warnings modal
+    function closeHeadphoneModal() {
+      const modal = document.getElementById("headphone-modal");
+      if (modal) modal.classList.remove("visible");
+      
+      // Warm chime initialization test
+      try {
+        audio.init();
+      } catch (e) {
+        console.warn("Audio Context init delayed until first gesture:", e);
+      }
+    }
+
+    // Settings Panel Toggle Animation handler
+    const settingsPanel = document.getElementById("settings-panel");
+    const toggleSettingsBtn = document.getElementById("toggle-settings-btn");
+
+    toggleSettingsBtn.addEventListener("click", () => {
+      settingsPanel.classList.toggle("collapsed");
+      if (settingsPanel.classList.contains("collapsed")) {
+        toggleSettingsBtn.innerHTML = "⚙️";
+        toggleSettingsBtn.setAttribute("title", "Open Settings Control Panel");
+      } else {
+        toggleSettingsBtn.innerHTML = "✕";
+        toggleSettingsBtn.setAttribute("title", "Collapse Settings Control Panel");
+      }
+    });
+
+    // Start/Stop Meditation Toggle button handler
+    const startBtn = document.getElementById("start-meditation-btn");
+    startBtn.addEventListener("click", () => {
+      if (state.isPlaying) {
+        endMeditationSession();
+      } else {
+        startMeditationSession();
+      }
+    });
+
+    // Visual theme selection updates
+    const themeButtons = document.querySelectorAll(".theme-btn");
+    themeButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        themeButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        
+        const themeVal = btn.getAttribute("data-theme-val");
+        state.theme = themeVal;
+        document.body.setAttribute("data-theme", themeVal);
+        
+        // Re-draw or recolor active elements
+        drawSriYantra();
+      });
+    });
+
+    // Duration slider handles
+    const durationSlider = document.getElementById("duration-slider");
+    const durationVal = document.getElementById("duration-val");
+    const timerOverlayText = document.querySelector(".timer-text-overlay");
+    const hudTimerText = document.querySelector(".hud-timer");
+
+    durationSlider.addEventListener("input", (e) => {
+      const mins = parseInt(e.target.value);
+      durationVal.innerHTML = `${mins} min`;
+      
+      // Update session values
+      state.duration = mins * 60;
+      state.timeLeft = mins * 60;
+      
+      // Update displays
+      const formattedTime = `${mins}:00`;
+      if (timerOverlayText) timerOverlayText.innerHTML = formattedTime;
+      if (hudTimerText) hudTimerText.innerHTML = formattedTime;
+    });
+
+    // Rotation speed slider handles
+    const rotationSlider = document.getElementById("rotation-slider");
+    const rotationValText = document.getElementById("rotation-val");
+
+    rotationSlider.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value);
+      if (val === 0) {
+        state.rotationSpeed = 0;
+        rotationValText.innerHTML = "None";
+      } else if (val < 30) {
+        state.rotationSpeed = 0.05;
+        rotationValText.innerHTML = "Slow";
+      } else if (val < 70) {
+        state.rotationSpeed = 0.15;
+        rotationValText.innerHTML = "Medium";
+      } else {
+        state.rotationSpeed = 0.35;
+        rotationValText.innerHTML = "Fast";
+      }
+    });
+
+    // Synchronization Mode Picker bindings
+    const modeButtons = document.querySelectorAll(".mode-btn");
+    const hudModeText = document.getElementById("hud-mode");
+
+    modeButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        modeButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        
+        const mode = btn.getAttribute("data-mode");
+        state.syncMode = mode;
+        
+        // Update HUD label
+        const modeLabel = btn.querySelector("span:nth-child(2) span:first-child").innerHTML;
+        if (hudModeText) hudModeText.innerHTML = modeLabel;
+      });
+    });
+
+    // Binaural Sound toggle buttons
+    const soundToggleBtn = document.getElementById("sound-toggle-btn");
+    let isBinauralEnabled = true;
+
+    soundToggleBtn.addEventListener("click", () => {
+      isBinauralEnabled = !isBinauralEnabled;
+      soundToggleBtn.classList.toggle("active");
+      
+      if (isBinauralEnabled) {
+        soundToggleBtn.innerHTML = "🔊 Binaural Sound: ON";
+        if (state.isPlaying) {
+          audio.start();
+        }
+      } else {
+        soundToggleBtn.innerHTML = "🔇 Binaural Sound: OFF";
+        audio.stop();
+      }
+    });
+
+    // Frequency Selector buttons
+    const freqButtons = document.querySelectorAll(".freq-btn");
+    const adhdMonitor = document.getElementById("adhd-monitor");
+    const adhdFreqValText = document.getElementById("adhd-freq-val");
+
+    freqButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        freqButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        
+        const freqRaw = btn.getAttribute("data-freq");
+        if (freqRaw === 'adhd') {
+          state.binauralFreq = 'adhd';
+          audio.setBeatFrequency('adhd');
+          if (adhdMonitor) adhdMonitor.style.display = 'block';
+        } else {
+          const freqVal = parseInt(freqRaw);
+          state.binauralFreq = freqVal;
+          audio.setBeatFrequency(freqVal);
+          if (adhdMonitor) adhdMonitor.style.display = 'none';
+        }
+      });
+    });
+
+    // Listen to active ADHD frequency changes from the audio engine
+    window.addEventListener('adhd-freq-change', (e) => {
+      if (adhdFreqValText) {
+        adhdFreqValText.innerHTML = e.detail.frequency;
+      }
+      
+      // ADHD Visual Pacing Lockstep Sync
+      // Dynamically adjust yantra sweep speed and rotation based on current beat frequency!
+      if (state.binauralFreq === 'adhd' && state.isPlaying) {
+        const freq = parseFloat(e.detail.frequency);
+        // Map 4Hz-24Hz to rotation speed 0.04-0.34 degrees/frame
+        state.rotationSpeed = 0.04 + ((freq - 4) / 20) * 0.30;
+        // Map 4Hz-24Hz to sweep speed 2.0-7.0
+        state.sweepSpeed = 2.0 + ((freq - 4) / 20) * 5.0;
+        
+        // Update slider values for visual indication
+        const rotSlider = document.getElementById("rotation-slider");
+        const rotValText = document.getElementById("rotation-val");
+        if (rotSlider && rotValText) {
+          const sliderPercent = Math.round(((state.rotationSpeed - 0.04) / 0.30) * 100);
+          rotSlider.value = sliderPercent;
+          
+          if (state.rotationSpeed < 0.08) {
+            rotValText.innerHTML = `Slow (${e.detail.frequency}Hz)`;
+          } else if (state.rotationSpeed < 0.22) {
+            rotValText.innerHTML = `Medium (${e.detail.frequency}Hz)`;
+          } else {
+            rotValText.innerHTML = `Fast (${e.detail.frequency}Hz)`;
+          }
+        }
+      }
+    });
+
+    // Sound Volume slider handles
+    const volumeSlider = document.getElementById("volume-slider");
+    const volumeValText = document.getElementById("volume-val");
+
+    volumeSlider.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value);
+      volumeValText.innerHTML = `${val}%`;
+      audio.setVolume(val / 100);
+    });
+
+    // Spatial sound calibration triggers
+    const calibrateBtn = document.getElementById("headphone-test-btn");
+    calibrateBtn.addEventListener("click", () => {
+      startHeadphoneTest();
+    });
+
+    // Gayatri Mantra Audio Chant Toggle
+    const mantraToggleBtn = document.getElementById("mantra-toggle-btn");
+    let isMantraChantEnabled = false;
+
+    mantraToggleBtn.addEventListener("click", () => {
+      isMantraChantEnabled = !isMantraChantEnabled;
+      mantraToggleBtn.classList.toggle("active");
+      
+      if (isMantraChantEnabled) {
+        mantraToggleBtn.innerHTML = "ॐ Gayatri Chant: ON";
+        mantraToggleBtn.style.background = "var(--glow-color)";
+        mantraToggleBtn.style.color = "#060814";
+        audio.setMantraEnabled(true);
+      } else {
+        mantraToggleBtn.innerHTML = "ॐ Gayatri Chant: OFF";
+        mantraToggleBtn.style.background = "rgba(var(--glow-rgb), 0.02)";
+        mantraToggleBtn.style.color = "var(--text-primary)";
+        audio.setMantraEnabled(false);
+      }
+    });
+
+    // Gayatri Mantra Lyric Guide Overlay Toggle
+    const lyricsToggleBtn = document.getElementById("lyrics-toggle-btn");
+    
+    lyricsToggleBtn.addEventListener("click", () => {
+      state.lyricsVisible = !state.lyricsVisible;
+      lyricsToggleBtn.classList.toggle("active");
+      
+      if (state.lyricsVisible) {
+        lyricsToggleBtn.innerHTML = "👁 Show Lyric Guide: ON";
+        lyricsToggleBtn.style.background = "rgba(var(--glow-rgb), 0.05)";
+        lyricsToggleBtn.style.color = "var(--text-primary)";
+      } else {
+        lyricsToggleBtn.innerHTML = "👁 Show Lyric Guide: OFF";
+        lyricsToggleBtn.style.background = "rgba(255, 255, 255, 0.02)";
+        lyricsToggleBtn.style.color = "var(--text-secondary)";
+        const overlay = document.getElementById("mantra-overlay");
+        if (overlay) overlay.classList.remove("visible");
+      }
+    });
+
+    // Gayatri Mantra Tempo Buttons
+    const tempoNormalBtn = document.getElementById("mantra-tempo-normal");
+    const tempoSlowBtn = document.getElementById("mantra-tempo-slow");
+
+    tempoNormalBtn.addEventListener("click", () => {
+      tempoNormalBtn.classList.add("active");
+      tempoSlowBtn.classList.remove("active");
+      audio.setMantraTempo("normal");
+    });
+
+    tempoSlowBtn.addEventListener("click", () => {
+      tempoSlowBtn.classList.add("active");
+      tempoNormalBtn.classList.remove("active");
+      audio.setMantraTempo("slow");
+    });
+  </script>
+
+</body>
+</html>

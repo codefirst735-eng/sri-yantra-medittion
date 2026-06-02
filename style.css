@@ -1,0 +1,851 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-color-1: #060814;
+  --bg-color-2: #0b112c;
+  --panel-bg: rgba(10, 15, 42, 0.65);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  
+  /* Cosmic Gold Theme (Default) */
+  --glow-color: #d4af37;
+  --glow-rgb: 212, 175, 55;
+  --secondary-glow: #ff8c00;
+  --accent-color: #ffd700;
+
+  --font-title: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  --transition-smooth: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Theme overrides */
+[data-theme="indigo"] {
+  --glow-color: #6366f1;
+  --glow-rgb: 99, 102, 241;
+  --secondary-glow: #a855f7;
+  --accent-color: #818cf8;
+}
+
+[data-theme="emerald"] {
+  --glow-color: #10b981;
+  --glow-rgb: 16, 185, 129;
+  --secondary-glow: #06b6d4;
+  --accent-color: #34d399;
+}
+
+[data-theme="crimson"] {
+  --glow-color: #f43f5e;
+  --glow-rgb: 244, 63, 94;
+  --secondary-glow: #ec4899;
+  --accent-color: #fb7185;
+}
+
+[data-theme="traditional"] {
+  --bg-color-1: #030d05;
+  --bg-color-2: #092611;
+  --glow-color: #eedc53;
+  --glow-rgb: 238, 220, 83;
+  --secondary-glow: #c62828;
+  --accent-color: #ffd700;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background: radial-gradient(circle at center, var(--bg-color-2) 0%, var(--bg-color-1) 100%);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Background Cosmic Nebula/Glows */
+.nebula {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(var(--glow-rgb), 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(var(--glow-rgb), 0.05) 0%, transparent 60%);
+  transition: var(--transition-smooth);
+}
+
+#starfield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Layout container */
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  z-index: 2;
+}
+
+/* Visualizer Canvas Area */
+.canvas-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+/* SVG Yantra Styles */
+.yantra-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 85vmin;
+  height: 85vmin;
+  max-width: 800px;
+  max-height: 800px;
+  transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+svg#sri {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 15px rgba(var(--glow-rgb), 0.2));
+  transform-origin: center center;
+}
+
+/* Geometric Lines Styling */
+.yantra-line {
+  stroke: var(--glow-color);
+  stroke-width: 1.5px;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.45;
+  transition: stroke 0.4s, stroke-width 0.3s, opacity 0.3s, filter 0.3s;
+}
+
+/* Highlight / Active Line State */
+.yantra-line.active {
+  stroke: var(--accent-color);
+  stroke-width: 3.5px;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px var(--accent-color)) drop-shadow(0 0 15px rgba(var(--glow-rgb), 0.8));
+}
+
+.yantra-circle {
+  stroke: var(--glow-color);
+  stroke-width: 1.5px;
+  fill: none;
+  opacity: 0.4;
+  transition: var(--transition-smooth);
+}
+
+.yantra-circle.active {
+  stroke: var(--accent-color);
+  stroke-width: 2.5px;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 6px var(--accent-color));
+}
+
+.yantra-petal {
+  stroke: var(--glow-color);
+  stroke-width: 1.5px;
+  fill: none;
+  opacity: 0.35;
+  transition: var(--transition-smooth);
+}
+
+.yantra-petal.active {
+  stroke: var(--accent-color);
+  stroke-width: 2.5px;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 6px var(--accent-color));
+}
+
+.yantra-bhupura {
+  stroke: var(--glow-color);
+  stroke-width: 2px;
+  fill: none;
+  opacity: 0.4;
+  transition: var(--transition-smooth);
+}
+
+.yantra-bhupura.active {
+  stroke: var(--accent-color);
+  stroke-width: 3px;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 8px var(--accent-color));
+}
+
+.yantra-bindu {
+  fill: var(--accent-color);
+  stroke: var(--glow-color);
+  stroke-width: 1px;
+  filter: drop-shadow(0 0 10px var(--accent-color));
+  opacity: 1;
+}
+
+/* Breathing Guide Ring */
+.breathing-ring {
+  position: absolute;
+  width: 90vmin;
+  height: 90vmin;
+  max-width: 850px;
+  max-height: 850px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--glow-rgb), 0.15);
+  box-shadow: inset 0 0 30px rgba(var(--glow-rgb), 0.05);
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.1s linear, opacity 0.5s ease;
+  opacity: 0;
+}
+
+.breathing-ring.active {
+  opacity: 1;
+}
+
+.breathing-label {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(var(--glow-rgb), 0.6);
+  opacity: 0.8;
+}
+
+/* Glassmorphic Side Settings Panel */
+.settings-panel {
+  width: 380px;
+  height: 100vh;
+  background: var(--panel-bg);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-left: 1px solid var(--panel-border);
+  padding: 2.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.4);
+  transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.settings-panel.collapsed {
+  transform: translateX(100%);
+}
+
+/* Toggle settings button */
+.toggle-settings-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(10, 15, 42, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--panel-border);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 11;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: var(--transition-smooth);
+}
+
+.toggle-settings-btn:hover {
+  background: rgba(var(--glow-rgb), 0.2);
+  border-color: rgba(var(--glow-rgb), 0.5);
+  box-shadow: 0 0 15px rgba(var(--glow-rgb), 0.4);
+}
+
+/* Settings typography */
+h1 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 1.65rem;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 2rem;
+  letter-spacing: 0.02em;
+}
+
+.settings-section {
+  margin-bottom: 1.75rem;
+}
+
+.section-title {
+  font-family: var(--font-title);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 0.75rem;
+}
+
+/* Custom Controls styling */
+.control-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+
+.control-label-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.control-label {
+  font-weight: 500;
+}
+
+.control-value {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+/* Theme selector cards */
+.theme-picker {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+
+.theme-btn {
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: var(--transition-smooth);
+}
+
+.theme-btn span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-bottom: 2px;
+}
+
+.theme-btn[data-theme-val="gold"] span { background: #d4af37; box-shadow: 0 0 6px #d4af37; }
+.theme-btn[data-theme-val="indigo"] span { background: #6366f1; box-shadow: 0 0 6px #6366f1; }
+.theme-btn[data-theme-val="emerald"] span { background: #10b981; box-shadow: 0 0 6px #10b981; }
+.theme-btn[data-theme-val="crimson"] span { background: #f43f5e; box-shadow: 0 0 6px #f43f5e; }
+.theme-btn[data-theme-val="traditional"] span { background: linear-gradient(135deg, #27ae60 0%, #f1c40f 50%, #e74c3c 100%); box-shadow: 0 0 6px #27ae60; }
+
+.theme-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Button Group / Mode Picker */
+.mode-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mode-btn {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-secondary);
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: var(--transition-smooth);
+}
+
+.mode-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.mode-btn.active {
+  background: rgba(var(--glow-rgb), 0.12);
+  border-color: rgba(var(--glow-rgb), 0.4);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 10px rgba(var(--glow-rgb), 0.1);
+}
+
+.mode-btn .icon {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+.mode-btn.active .icon {
+  color: var(--accent-color);
+  opacity: 1;
+}
+
+/* Slider custom styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--accent-color);
+  transition: var(--transition-smooth);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Binaural beats panel container */
+.audio-card {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--panel-border);
+  padding: 1rem;
+  margin-top: 0.75rem;
+}
+
+.sound-toggle-btn {
+  width: 100%;
+  padding: 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--transition-smooth);
+}
+
+.sound-toggle-btn.active {
+  background: var(--glow-color);
+  color: #060814;
+  font-weight: 600;
+  box-shadow: 0 0 15px rgba(var(--glow-rgb), 0.5);
+  border-color: var(--accent-color);
+}
+
+.sound-test-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.sound-test-btn:hover {
+  border-color: rgba(var(--glow-rgb), 0.5);
+  color: var(--text-primary);
+}
+
+/* Master Action Button */
+.master-btn-container {
+  margin-top: 1.5rem;
+}
+
+.start-meditation-btn {
+  width: 100%;
+  padding: 1.1rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--glow-color) 0%, var(--secondary-glow) 100%);
+  border: none;
+  color: #060814;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(var(--glow-rgb), 0.35);
+  transition: var(--transition-smooth);
+  text-transform: uppercase;
+}
+
+.start-meditation-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(var(--glow-rgb), 0.5);
+  filter: brightness(1.1);
+}
+
+.start-meditation-btn:active {
+  transform: translateY(1px);
+}
+
+.start-meditation-btn.running {
+  background: rgba(255, 63, 94, 0.2);
+  border: 1px solid rgba(254, 63, 94, 0.4);
+  color: #fb7185;
+  box-shadow: none;
+  font-weight: 600;
+}
+
+.start-meditation-btn.running:hover {
+  background: rgba(255, 63, 94, 0.3);
+  transform: none;
+}
+
+/* Audio Frequency Selector */
+.freq-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.freq-btn {
+  padding: 0.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.freq-btn.active {
+  background: rgba(var(--glow-rgb), 0.1);
+  border-color: rgba(var(--glow-rgb), 0.4);
+  color: var(--text-primary);
+}
+
+/* Main Meditative Head-Up-Display (HUD) */
+.hud-display {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.hud-display.visible {
+  opacity: 1;
+}
+
+/* Circular Timer Progress */
+.timer-circular {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.timer-circular svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.timer-circular circle {
+  fill: none;
+  stroke-width: 4px;
+}
+
+.timer-circular .circle-bg {
+  stroke: rgba(255, 255, 255, 0.05);
+}
+
+.timer-circular .circle-progress {
+  stroke: var(--accent-color);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear, stroke 0.4s;
+}
+
+.timer-text-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hud-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-timer {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.hud-mode {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+/* Modal Overlay for Calibration and Headphone Notice */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(3, 4, 10, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 480px;
+  background: rgba(10, 15, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border-radius: 24px;
+  padding: 2.5rem;
+  text-align: center;
+  transform: translateY(20px);
+  transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.modal-overlay.visible .modal-card {
+  transform: translateY(0);
+}
+
+.modal-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  color: var(--accent-color);
+  animation: pulse-glow 2s infinite alternate;
+}
+
+.modal-title {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.modal-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.modal-btn {
+  width: 100%;
+  padding: 0.9rem;
+  border-radius: 12px;
+  background: var(--glow-color);
+  border: none;
+  color: #060814;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(var(--glow-rgb), 0.3);
+  transition: var(--transition-smooth);
+}
+
+.modal-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(var(--glow-rgb), 0.45);
+}
+
+/* Breathing Text Animation Keyframes */
+@keyframes pulse-glow {
+  from {
+    text-shadow: 0 0 10px rgba(var(--glow-rgb), 0.4);
+    transform: scale(1);
+  }
+  to {
+    text-shadow: 0 0 25px rgba(var(--glow-rgb), 0.9);
+    transform: scale(1.05);
+  }
+}
+
+/* Settings panel toggle animations and hover states */
+.footer-text {
+  font-size: 0.7rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.2);
+  margin-top: 1.5rem;
+}
+
+.footer-text a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+/* Responsive styling overrides */
+@media (max-width: 900px) {
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .settings-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+    max-width: 380px;
+    height: 100%;
+    transform: translateX(100%);
+  }
+  
+  .settings-panel.active {
+    transform: translateX(0);
+  }
+  
+  .canvas-container {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .breathing-ring {
+    width: 80vmin;
+    height: 80vmin;
+  }
+}
+/* Glassmorphic Gayatri Mantra Lyric Overlay Card */
+.mantra-overlay {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translate(-50%, 15px);
+  width: 90%;
+  max-width: 650px;
+  background: rgba(10, 15, 42, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  padding: 1.35rem;
+  text-align: center;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.mantra-overlay.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.mantra-sanskrit {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  text-shadow: 0 0 12px rgba(var(--glow-rgb), 0.5);
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.04em;
+}
+
+.mantra-translit {
+  font-size: 1.0rem;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+  opacity: 0.95;
+  letter-spacing: 0.02em;
+}
+
+.mantra-translation {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  font-weight: 400;
+}
