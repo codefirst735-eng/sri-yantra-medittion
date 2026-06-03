@@ -10,6 +10,7 @@ const state = {
   r: 175,
   rotation: 0,
   rotationSpeed: 0.15, // degrees per frame
+  enableRotation: true, // option to disable rotation
   isPlaying: false,
   duration: 600, // 10 minutes in seconds
   timeLeft: 600,
@@ -26,10 +27,7 @@ const state = {
   breathingState: 'inhale', // 'inhale', 'hold-in', 'exhale', 'hold-out'
   
   // Audio configuration link
-  binauralFreq: 6,
-  
-  // Gayatri Mantra Lyric configuration
-  lyricsVisible: true
+  binauralFreq: 6
 };
 
 // Lists of generated SVG elements for real-time glow control
@@ -37,6 +35,39 @@ let yantraLines = [];
 let leftSideElements = [];
 let rightSideElements = [];
 let centerElements = [];
+
+// Screen Wake Lock API to prevent the system/display from sleeping during active meditation
+let wakeLock = null;
+
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    console.log('Screen Wake Lock acquired successfully.');
+  } catch (err) {
+    console.warn(`Could not acquire Screen Wake Lock: ${err.message}`);
+  }
+}
+
+function releaseWakeLock() {
+  if (wakeLock !== null) {
+    wakeLock.release()
+      .then(() => {
+        wakeLock = null;
+        console.log('Screen Wake Lock released.');
+      })
+      .catch((err) => {
+        console.warn(`Error releasing Screen Wake Lock: ${err.message}`);
+      });
+  }
+}
+
+// Re-acquire Wake Lock if the tab becomes visible again during a session
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && state.isPlaying) {
+    await requestWakeLock();
+  }
+});
 
 // Particle Starfield variables
 let starfieldCanvas;
@@ -604,35 +635,28 @@ function updateBreathingCycle(deltaTime) {
   const stageDuration = 4000; // 4 seconds per box side
   const cycleTime = state.breathingTimer % (stageDuration * 4);
   
-  // Map breathing phase to Gayatri Mantra Lyric Index!
-  let lyricIdx = 0;
-  
   if (cycleTime < stageDuration) {
     // Inhale: expand ring from scale 1.0 to 1.18
     state.breathingState = 'inhale';
     const progress = cycleTime / stageDuration;
     scale = 1.0 + progress * 0.18;
     label = "Inhale";
-    lyricIdx = 0;
   } else if (cycleTime < stageDuration * 2) {
     // Hold In: maintain scale at 1.18
     state.breathingState = 'hold-in';
     scale = 1.18;
     label = "Hold In";
-    lyricIdx = 1;
   } else if (cycleTime < stageDuration * 3) {
     // Exhale: contract ring from scale 1.18 to 1.0
     state.breathingState = 'exhale';
     const progress = (cycleTime - stageDuration * 2) / stageDuration;
     scale = 1.18 - progress * 0.18;
     label = "Exhale";
-    lyricIdx = 2;
   } else {
     // Hold Out: maintain scale at 1.0
     state.breathingState = 'hold-out';
     scale = 1.0;
     label = "Hold Out";
-    lyricIdx = 3;
   }
   
   state.breathingScale = scale;
@@ -645,47 +669,6 @@ function updateBreathingCycle(deltaTime) {
   }
   if (breathingLabel && breathingLabel.innerHTML !== label) {
     breathingLabel.innerHTML = label;
-  }
-  
-  // Update Gayatri Lyrics Overlay in lockstep with breathing pranayama!
-  const overlay = document.getElementById("mantra-overlay");
-  if (state.lyricsVisible && state.isPlaying) {
-    const sanskritText = document.getElementById("mantra-sanskrit");
-    const translitText = document.getElementById("mantra-translit");
-    const translationText = document.getElementById("mantra-translation");
-    
-    const gayatriLyrics = [
-      { sanskrit: "ॐ भूर्भुवः स्वः ।", translit: "oṃ bhūr bhuvaḥ svaḥ", translation: "We contemplate the cosmic fields of physical, vital, and causal existence." },
-      { sanskrit: "तत्सवितुर्वरेण्यं ।", translit: "tat savitur vareṇyaṃ", translation: "May we absorb the sublime, radiant light of the creative solar consciousness." },
-      { sanskrit: "भर्गो देवस्य धीमहि ।", translit: "bhargo devasya dhīmahi", translation: "May it dissolve all mental darkness, impurities, and intellectual ignorance." },
-      { sanskrit: "धियो यो नः प्रचोदयात् ॥", translit: "dhiyo yo naḥ pracodayāt", translation: "And awaken, inspire, and illuminate our minds into pure awareness." }
-    ];
-    
-    if (overlay && !overlay.classList.contains("visible")) {
-      overlay.classList.add("visible");
-    }
-    
-    const currentLyric = gayatriLyrics[lyricIdx];
-    if (sanskritText && sanskritText.innerHTML !== currentLyric.sanskrit) {
-      // Soft crossfade transition
-      sanskritText.style.opacity = "0";
-      translitText.style.opacity = "0";
-      translationText.style.opacity = "0";
-      
-      setTimeout(() => {
-        sanskritText.innerHTML = currentLyric.sanskrit;
-        translitText.innerHTML = currentLyric.translit;
-        translationText.innerHTML = currentLyric.translation;
-        
-        sanskritText.style.opacity = "1";
-        translitText.style.opacity = "1";
-        translationText.style.opacity = "1";
-      }, 250);
-    }
-  } else {
-    if (overlay && overlay.classList.contains("visible")) {
-      overlay.classList.remove("visible");
-    }
   }
 }
 
@@ -700,11 +683,11 @@ function animationLoop(timestamp) {
   // 1. Draw Starfield
   drawStarfield();
   
-  // 2. Slow Yantra spin
-  const wrapper = document.querySelector(".yantra-wrapper");
-  if (wrapper && state.isPlaying) {
+  // 2. Slow Yantra spin applied directly to the SVG element to prevent transition lag/wobble
+  const sriSvg = document.getElementById("sri");
+  if (sriSvg && state.isPlaying && state.enableRotation) {
     state.rotation += state.rotationSpeed;
-    wrapper.style.transform = `rotate(${state.rotation}deg)`;
+    sriSvg.style.transform = `rotate(${state.rotation}deg)`;
   }
   
   // 3. Perform Brain Hemisphere Sync and Line Glow Modulation
@@ -814,6 +797,9 @@ function startMeditationSession() {
   // 1. Trigger audio start
   audio.start();
   
+  // 1.5. Acquire Screen Wake Lock to prevent screen sleep/dimming during meditation
+  requestWakeLock();
+  
   // 2. Clear previous session intervals
   if (sessionTimerInterval) clearInterval(sessionTimerInterval);
   
@@ -870,6 +856,9 @@ function endMeditationSession(completed = false) {
   // Stop audio generators
   audio.stop();
   
+  // Release Screen Wake Lock
+  releaseWakeLock();
+  
   // Reset HUD
   const startBtn = document.querySelector(".start-meditation-btn");
   const hud = document.querySelector(".hud-display");
@@ -887,6 +876,12 @@ function endMeditationSession(completed = false) {
   if (toggleBtn) toggleBtn.innerHTML = "✕";
   
   // Reset rotation and line glow
+  state.rotation = 0;
+  const sriSvg = document.getElementById("sri");
+  if (sriSvg) {
+    sriSvg.style.transform = "";
+  }
+  
   yantraLines.forEach(line => {
     line.classList.remove("active");
     line.style.opacity = "0.45";

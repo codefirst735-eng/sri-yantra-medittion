@@ -49,14 +49,6 @@
           <span class="hud-mode" id="hud-mode">Geometric Zig-Zag Flow</span>
         </div>
       </div>
-      
-      <!-- Gayatri Mantra Floating Lyric Overlay -->
-      <div class="mantra-overlay" id="mantra-overlay">
-        <div class="mantra-sanskrit" id="mantra-sanskrit">ॐ भूर्भुवः स्वः ।</div>
-        <div class="mantra-translit" id="mantra-translit">oṃ bhūr bhuvaḥ svaḥ</div>
-        <div class="mantra-translation" id="mantra-translation">We contemplate the cosmic fields of physical, vital, and causal existence.</div>
-      </div>
-      
     </main>
 
     <!-- Sleek Glassmorphic Control Panel -->
@@ -112,6 +104,14 @@
               <span class="control-value" id="rotation-val">Medium</span>
             </div>
             <input type="range" id="rotation-slider" min="0" max="100" value="40">
+          </div>
+          
+          <div class="control-group" style="margin-top: 0.5rem; display: flex; flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <span class="control-label" style="font-size: 0.85rem; margin-bottom: 0;">Rotate Yantra Geometry</span>
+            <label class="switch-container">
+              <input type="checkbox" id="rotation-toggle" checked>
+              <span class="switch-slider"></span>
+            </label>
           </div>
         </section>
 
@@ -179,25 +179,6 @@
             </div>
 
             <button class="sound-test-btn" id="headphone-test-btn">Spatial Sound Calibration</button>
-          </div>
-        </section>
-
-        <!-- Section 5: Vedic Gayatri Mantra -->
-        <section class="settings-section">
-          <div class="section-title">Vedic Gayatri Mantra</div>
-          <div class="audio-card">
-            <button class="sound-toggle-btn" id="mantra-toggle-btn" style="background: rgba(var(--glow-rgb), 0.02); border-color: var(--panel-border);">
-              <span>ॐ</span> Gayatri Chant: OFF
-            </button>
-            
-            <div class="freq-selector" style="grid-template-columns: repeat(2, 1fr); margin-top: 0.75rem;">
-              <button class="freq-btn active" id="mantra-tempo-normal" title="Normal Vedic tempo for rhythmic meditation pacing.">Normal Tempo</button>
-              <button class="freq-btn" id="mantra-tempo-slow" title="Slow, deep, harmonic drone chants designed for deep relaxation and ADHD focus.">Slow & Deep</button>
-            </div>
-            
-            <button class="sound-toggle-btn active" id="lyrics-toggle-btn" style="margin-top: 0.75rem; background: rgba(var(--glow-rgb), 0.05); border-color: rgba(var(--glow-rgb), 0.2);">
-              <span>👁</span> Show Lyric Guide: ON
-            </button>
           </div>
         </section>
       </div>
@@ -315,26 +296,63 @@
       if (hudTimerText) hudTimerText.innerHTML = formattedTime;
     });
 
-    // Rotation speed slider handles
+    // Rotation speed slider and toggle handles
     const rotationSlider = document.getElementById("rotation-slider");
     const rotationValText = document.getElementById("rotation-val");
+    const rotationToggle = document.getElementById("rotation-toggle");
 
-    rotationSlider.addEventListener("input", (e) => {
-      const val = parseInt(e.target.value);
-      if (val === 0) {
-        state.rotationSpeed = 0;
-        rotationValText.innerHTML = "None";
-      } else if (val < 30) {
-        state.rotationSpeed = 0.05;
-        rotationValText.innerHTML = "Slow";
-      } else if (val < 70) {
-        state.rotationSpeed = 0.15;
-        rotationValText.innerHTML = "Medium";
-      } else {
-        state.rotationSpeed = 0.35;
-        rotationValText.innerHTML = "Fast";
+    function updateRotationSliderState() {
+      const isEnabled = state.enableRotation;
+      if (rotationSlider) {
+        rotationSlider.disabled = !isEnabled;
+        const rotationGroup = rotationSlider.closest('.control-group');
+        if (rotationGroup) {
+          if (isEnabled) {
+            rotationGroup.style.opacity = '1';
+            rotationGroup.style.pointerEvents = 'auto';
+          } else {
+            rotationGroup.style.opacity = '0.5';
+            rotationGroup.style.pointerEvents = 'none';
+          }
+        }
       }
-    });
+    }
+
+    if (rotationSlider) {
+      rotationSlider.addEventListener("input", (e) => {
+        const val = parseInt(e.target.value);
+        if (val === 0) {
+          state.rotationSpeed = 0;
+          rotationValText.innerHTML = "None";
+        } else if (val < 30) {
+          state.rotationSpeed = 0.05;
+          rotationValText.innerHTML = "Slow";
+        } else if (val < 70) {
+          state.rotationSpeed = 0.15;
+          rotationValText.innerHTML = "Medium";
+        } else {
+          state.rotationSpeed = 0.35;
+          rotationValText.innerHTML = "Fast";
+        }
+      });
+    }
+
+    if (rotationToggle) {
+      rotationToggle.addEventListener("change", (e) => {
+        state.enableRotation = e.target.checked;
+        updateRotationSliderState();
+        
+        if (!state.enableRotation) {
+          state.rotation = 0;
+          const sriSvg = document.getElementById("sri");
+          if (sriSvg) {
+            sriSvg.style.transform = "";
+          }
+        }
+      });
+      // Initialize state on load
+      updateRotationSliderState();
+    }
 
     // Synchronization Mode Picker bindings
     const modeButtons = document.querySelectorAll(".mode-btn");
@@ -415,7 +433,7 @@
         // Update slider values for visual indication
         const rotSlider = document.getElementById("rotation-slider");
         const rotValText = document.getElementById("rotation-val");
-        if (rotSlider && rotValText) {
+        if (state.enableRotation && rotSlider && rotValText) {
           const sliderPercent = Math.round(((state.rotationSpeed - 0.04) / 0.30) * 100);
           rotSlider.value = sliderPercent;
           
@@ -444,63 +462,6 @@
     const calibrateBtn = document.getElementById("headphone-test-btn");
     calibrateBtn.addEventListener("click", () => {
       startHeadphoneTest();
-    });
-
-    // Gayatri Mantra Audio Chant Toggle
-    const mantraToggleBtn = document.getElementById("mantra-toggle-btn");
-    let isMantraChantEnabled = false;
-
-    mantraToggleBtn.addEventListener("click", () => {
-      isMantraChantEnabled = !isMantraChantEnabled;
-      mantraToggleBtn.classList.toggle("active");
-      
-      if (isMantraChantEnabled) {
-        mantraToggleBtn.innerHTML = "ॐ Gayatri Chant: ON";
-        mantraToggleBtn.style.background = "var(--glow-color)";
-        mantraToggleBtn.style.color = "#060814";
-        audio.setMantraEnabled(true);
-      } else {
-        mantraToggleBtn.innerHTML = "ॐ Gayatri Chant: OFF";
-        mantraToggleBtn.style.background = "rgba(var(--glow-rgb), 0.02)";
-        mantraToggleBtn.style.color = "var(--text-primary)";
-        audio.setMantraEnabled(false);
-      }
-    });
-
-    // Gayatri Mantra Lyric Guide Overlay Toggle
-    const lyricsToggleBtn = document.getElementById("lyrics-toggle-btn");
-    
-    lyricsToggleBtn.addEventListener("click", () => {
-      state.lyricsVisible = !state.lyricsVisible;
-      lyricsToggleBtn.classList.toggle("active");
-      
-      if (state.lyricsVisible) {
-        lyricsToggleBtn.innerHTML = "👁 Show Lyric Guide: ON";
-        lyricsToggleBtn.style.background = "rgba(var(--glow-rgb), 0.05)";
-        lyricsToggleBtn.style.color = "var(--text-primary)";
-      } else {
-        lyricsToggleBtn.innerHTML = "👁 Show Lyric Guide: OFF";
-        lyricsToggleBtn.style.background = "rgba(255, 255, 255, 0.02)";
-        lyricsToggleBtn.style.color = "var(--text-secondary)";
-        const overlay = document.getElementById("mantra-overlay");
-        if (overlay) overlay.classList.remove("visible");
-      }
-    });
-
-    // Gayatri Mantra Tempo Buttons
-    const tempoNormalBtn = document.getElementById("mantra-tempo-normal");
-    const tempoSlowBtn = document.getElementById("mantra-tempo-slow");
-
-    tempoNormalBtn.addEventListener("click", () => {
-      tempoNormalBtn.classList.add("active");
-      tempoSlowBtn.classList.remove("active");
-      audio.setMantraTempo("normal");
-    });
-
-    tempoSlowBtn.addEventListener("click", () => {
-      tempoSlowBtn.classList.add("active");
-      tempoNormalBtn.classList.remove("active");
-      audio.setMantraTempo("slow");
     });
   </script>
 
